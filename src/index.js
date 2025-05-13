@@ -2,18 +2,35 @@ import React, {useState} from "react";
 import ReactDOM from "react-dom/client";
 import './index.css'
 
-const Square=(props)=>{
-  return(
-    <button
-     className="square"
-     onClick={props.onClickEvent}
-     >
-      {props.value}
-    </button>
-  );
-};
+  const Square = (props) => {
+    let className = "square";
+    if (props.value === 'X') {
+      className += " square-x";
+    } else if (props.value === 'O') {
+      className += " square-o";
+    }
+    if (props.animate) {
+      className += " sweep-animation";
+    }
+    return (
+      <button className={className} onClick={props.onClickEvent}>
+        {props.value}
+      </button>
+    );
+  };
 
 const Board=()=>{
+const [animate, setAnimate] = useState(false);
+
+const reiniciarJuego = () => {
+  setAnimate(true);
+  setTimeout(() => {
+    setSquares(Array(9).fill(null));
+    setXIsNext(true);
+    setAnimate(false);
+  }, 500); 
+};
+
 const initialSquares = Array(9).fill(null);
 const[squares,setSquares]=useState(initialSquares);
 const [xIsNext,setXIsNext]= useState(true);
@@ -34,32 +51,47 @@ const handleClickEvent=(i)=>{
   setXIsNext(!xIsNext);
 };
 
-  const renderSquare= (i)=>{
-    return(
-      <Square
-       value={squares[i]}
-       onClickEvent={()=> handleClickEvent(i)}
-        />
-    );};
+  const coloredPlayer = (player) => {
+    if (player === 'X') {
+      return <span className="player-x">X</span>;
+    } else if (player === 'O') {
+      return <span className="player-o">O</span>;
+    } else {
+      return null;
+    }
+  };
+
+ const renderSquare = (i) => {
+  return (
+    <Square
+      value={squares[i]}
+      onClickEvent={() => handleClickEvent(i)}
+      animate={animate}
+    />
+  );};
+
 
   const winner =calculateWinner(squares);
-  const status = winner?
-  `Gano el jugador:${winner}`:
-  `Next player: ${xIsNext ? 'X' : 'O'}`;
+  const status = winner ? (
+  <>Gano el jugador: {coloredPlayer(winner)}</>):(
+  <>Siguiente jugador: {coloredPlayer(xIsNext ? 'X':'O')}</>);
   return(
-    <div>
+    <div className="board-container">
       <div className="status">{status}</div>
       <div className="board-row">
-      {renderSquare(0)}{renderSquare(1)}{renderSquare(2)}
+        {renderSquare(0)}{renderSquare(1)}{renderSquare(2)}
       </div>
       <div className="board-row">
-      {renderSquare(3)}{renderSquare(4)}{renderSquare(5)}
+        {renderSquare(3)}{renderSquare(4)}{renderSquare(5)}
       </div>
       <div className="board-row">
-      {renderSquare(6)}{renderSquare(7)}{renderSquare(8)}
+        {renderSquare(6)}{renderSquare(7)}{renderSquare(8)}
       </div>
+      <button className="reset-button" onClick={reiniciarJuego}>
+        Reiniciar juego
+      </button>
     </div>
-  )
+  );
 }
 
 const Game = () => {
